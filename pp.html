@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Pemesanan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            position: relative;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .form-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-screen img {
+            width: 100px;
+            height: 100px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-page {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            background-color: #f5f5f5;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .success-page .checkmark {
+            font-size: 80px;
+            color: #4CAF50;
+        }
+
+        .success-page .details {
+            margin: 20px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .success-page .close-button {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .success-page .close-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .time-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 15px;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                font-size: 13px;
+            }
+
+            .form-group button {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+
+        .date-with-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .time {
+            color: #888;
+            font-size: 12px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="loading-screen" id="loading-screen">
+        <img src="loading.png" alt="Loading">
+    </div>
+
+    <div class="time-display" id="time-display"></div>
+
+    <div class="form-container" id="form-container" style="display: none;">
+        <h2>Formulir Pemesanan</h2>
+        <form id="order-form" action="https://formspree.io/f/xeoopdoe" method="POST">
+            <div class="form-group">
+                <label for="name">Nama</label>
+                <input type="text" id="name" name="name" placeholder="Masukkan nama Anda" required>
+            </div>
+            <div class="form-group">
+                <label for="menu">Menu Makanan</label>
+                <select id="menu" name="menu" required>
+                    <option value="">Pilih menu makanan</option>
+                    <option value="Es">Es (tulis detail di catatan)</option>
+                    <option value="Mie">Mie (tulis detail di catatan)</option>
+                    <option value="Kopi">Kopi (tulis detail di catatan)</option>
+                    <option value="Rokok">Rokok (tulis detail di catatan)</option>
+                    <option value="Lainnya">Lainnya... (tulis detail di catatan)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="phone">Nomor Telepon</label>
+                <input type="tel" id="phone" name="phone" placeholder="Masukkan nomor telepon Anda" required>
+            </div>
+            <div class="form-group">
+                <label for="date">Tanggal Pemesanan</label>
+                <div class="date-with-time">
+                    <input type="text" id="date" name="date" readonly required>
+                    <span class="time" id="time"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="notes">Catatan Tambahan</label>
+                <textarea id="notes" name="notes" placeholder="Masukkan catatan tambahan (opsional)"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit">Kirim</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="success-page" id="success-page">
+        <div class="checkmark">✔</div>
+        <div class="details" id="order-details"></div>
+        <p>Nomor anda akan dihubungi saat pemesanan anda sudah selesai.</p>
+        <button class="close-button" onclick="resetForm()">Kembali</button>
+    </div>
+
+    <script>
+        // Tampilkan waktu saat ini di kanan atas
+        function updateTime() {
+            const timeDisplay = document.getElementById('time-display');
+            const now = new Date();
+            timeDisplay.textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Animasi loading sebelum halaman muncul
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('form-container').style.display = 'block';
+            }, 5000); // 2 detik
+
+            // Set tanggal pemesanan otomatis ke waktu sekarang
+            const dateField = document.getElementById('date');
+            const timeField = document.getElementById('time');
+            const now = new Date();
+            dateField.value = now.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            timeField.textContent = now.toLocaleTimeString('id-ID');
+        };
+
+        // SweetAlert untuk konfirmasi pengiriman
+        const form = document.getElementById('order-form');
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+
+            Swal.fire({
+                title: 'Konfirmasi Pesanan',
+                text: 'Apakah Anda yakin ingin mengirim pesanan ini?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Kirim',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+                        if (response.ok) {
+                            const name = document.getElementById('name').value;
+                            const menu = document.getElementById('menu').value;
+
+                            // Tampilkan halaman sukses
+                            document.getElementById('form-container').style.display = 'none';
+                            document.getElementById('success-page').style.display = 'flex';
+
+                            // Tambahkan detail pesanan
+                            const orderDetails = document.getElementById('order-details');
+                            orderDetails.innerHTML = `<p>Terima kasih, <b>${name}</b>!</p><p>Anda telah memesan: <b>${menu}</b></p>`;
+                        } else {
+                            Swal.fire('Oops!', 'Terjadi kesalahan, silakan coba lagi.', 'error');
+                        }
+                    } catch (error) {
+                        Swal.fire('Oops!', 'Terjadi kesalahan, silakan coba lagi.', 'error');
+                    }
+                }
+            });
+        });
+
+        // Fungsi untuk reset form
+        function resetForm() {
+            document.getElementById('success-page').style.display = 'none';
+            document.getElementById('form-container').style.display = 'block';
+            document.getElementById('order-form').reset();
+        }
+    </script>
+</body>
+</html>
